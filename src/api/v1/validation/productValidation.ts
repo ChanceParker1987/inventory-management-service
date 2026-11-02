@@ -1,45 +1,35 @@
+
 import Joi from "joi";
 import { RequestSchema } from "../middleware/validateRequest";
 
-/**
- * Item schema organised by request type
- */
-export const itemSchemas: Record<string, RequestSchema> = {
-    // POST /api/v1/items - Create new Item
+export const productSchemas: Record<string, RequestSchema> = {
+    // POST /api/v1/products
     create: {
         body: Joi.object({
-            name: Joi.string().required().messages({
-                "any.required": "Name is required",
-                "string.empty": "Name cannot be empty",
-            }),
-            description: Joi.string().required().messages({
-                "any.required": "Description is required",
-                "string.empty": "Description cannot be empty",
-            }),
-            price: Joi.number().optional().min(0).messages({
-                "number.min": "Price must greater than 0",
-            }),
+            name: Joi.string().min(2).max(80).required(),
+            sku: Joi.string()
+                .pattern(/^[A-Z]{3}\d{4}$/)
+                .required(),
+            quantity: Joi.number().integer().min(0).required(),
+            price: Joi.number().positive().precision(2).strict().required(),
+            category: Joi.string()
+                .valid("electronics", "clothing", "food", "tools", "other")
+                .required(),
         }),
     },
 
-    // PUT /api/v1/items/:id - Update Item
+    // PUT /api/v1/products/:id
     update: {
         params: Joi.object({
-            id: Joi.string().required().messages({
-                "any.required": "Item ID is required",
-                "string.empty": "Item ID cannot be empty",
-            }),
+            id: Joi.string().required(),
         }),
         body: Joi.object({
-            name: Joi.string().optional().messages({
-                "string.empty": "Name cannot be empty",
-            }),
-            description: Joi.string().optional().messages({
-                "string.empty": "Description cannot be empty",
-            }),
-            price: Joi.number().optional().min(0).messages({
-                "number.min": "Price must greater than 0",
-            }),
+            name: Joi.string().min(2).max(80).optional(),
+            quantity: Joi.number().integer().min(0).optional(),
+            price: Joi.number().positive().precision(2).strict().optional(),
+            category: Joi.string()
+                .valid("electronics", "clothing", "food", "tools", "other")
+                .optional(),
         }),
     },
 };

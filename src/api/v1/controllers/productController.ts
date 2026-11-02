@@ -67,8 +67,8 @@ export const updateProduct = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        // const id: string = req.params.id;
-        const { id } = req.params;
+        // const id: string = req.params.id as string;
+        const id = req.params.id as string;
 
         // Extract update fields
         const { name, quantity, price, category } = req.body;
@@ -85,6 +85,48 @@ export const updateProduct = async (
             successResponse(updatedProduct, "Product updated successfully")
         );
     } catch (error: unknown) {
+        next(error);
+    }
+};
+
+export const getProductById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const id = req.params.id as string;
+        const product = await productService.getProductById(id);
+
+        res.status(200).json(
+            successResponse(product, "Product retrieved successfully")
+        );
+    } catch (error: unknown) {
+        if (error instanceof Error && error.message.includes("not found")) {
+            res.status(404).json({ error: error.message });
+            return;
+        }
+        next(error);
+    }
+};
+
+export const deleteProduct = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const id = req.params.id as string;
+        await productService.deleteProduct(id);
+
+        res.status(200).json({
+            message: "Product deleted successfully"
+        });
+    } catch (error: unknown) {
+        if (error instanceof Error && error.message.includes("not found")) {
+            res.status(404).json({ error: error.message });
+            return;
+        }
         next(error);
     }
 };
